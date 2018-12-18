@@ -14,19 +14,19 @@ There will be lots of layers in Caffe, it is impossible to know how all layers a
 
 ### Dependency
 
-##### General requirement:
+**General requirement:**
 
 `python2` or `python3` are both OK, depend on your `pycaffe` API.
 
 `pytorch` >= 0.4
 
-#####Special requirement:
+**Special requirement:**
 
 Only the conversion code requires `pycaffe`.
 
 ### Usage
 
-##### Conversion
+**Conversion**
 
 ```
 python caffe2pth_convertor.py \
@@ -35,7 +35,7 @@ python caffe2pth_convertor.py \
  --pthmodel=OUTPUT_PTHMODEL_PATH
 ```
 
-##### Use the model in Pytorch
+**Use the model in Pytorch**
 
 ```python
 from caffe2pth.caffenet import *
