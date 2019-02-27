@@ -150,27 +150,27 @@ class Crop(nn.Module):
 
 
 class Slice(nn.Module):
-   def __init__(self, axis, slice_points):
-       super(Slice, self).__init__()
-       self.axis = axis
-       self.slice_points = slice_points
+    def __init__(self, axis, slice_points):
+        super(Slice, self).__init__()
+        self.axis = axis
+        self.slice_points = slice_points
 
-   def forward(self, x):
-       prev = 0
-       outputs = []
-       is_cuda = x.data.is_cuda
-       if is_cuda: device_id = x.data.get_device()
-       for idx, slice_point in enumerate(self.slice_points):
-           rng = range(prev, slice_point)
-           rng = torch.LongTensor(rng)
-           if is_cuda: rng = rng.cuda(device_id)
-           rng = Variable(rng)
-           y = x.index_select(self.axis, rng)
-           prev = slice_point
-           outputs.append(y)
-       return tuple(outputs)
+    def forward(self, x):
+        prev = 0
+        outputs = []
+        is_cuda = x.data.is_cuda
+        if is_cuda: device_id = x.data.get_device()
+        for idx, slice_point in enumerate(self.slice_points):
+            rng = range(prev, slice_point)
+            rng = torch.LongTensor(rng)
+            if is_cuda: rng = rng.cuda(device_id)
+            rng = Variable(rng)
+            y = x.index_select(self.axis, rng)
+            prev = slice_point
+            outputs.append(y)
+        return tuple(outputs)
 
-   def __repr__(self):
+    def __repr__(self):
         return 'Slice(axis=%d, slice_points=%s)' % (self.axis, self.slice_points)
 
 
@@ -409,7 +409,8 @@ class CaffeNet(nn.Module):
         self.omit_data_layer = omit_data_layer
         self.phase = phase
         self.net_info = parse_prototxt(protofile)
-        self.models = self.create_network(self.net_info, width, height, channels)
+        self.verbose = True
+        self.models = self.create_network(self.net_info, width, height, channels, self.verbose)
         for name, model in self.models.items():
             self.add_module(name, model)
 
@@ -419,7 +420,6 @@ class CaffeNet(nn.Module):
             self.mean_file = self.net_info['props']['mean_file']
 
         self.blobs = None
-        self.verbose = True
         self.train_outputs = []
         self.eval_outputs = []
         self.forward_data_only = False
@@ -686,7 +686,7 @@ class CaffeNet(nn.Module):
                     print('load_weights: unknown type %s' % ltype)
                 i = i + 1
 
-    def create_network(self, net_info, input_width = None, input_height = None, input_channels = None):
+    def create_network(self, net_info, input_width = None, input_height = None, input_channels = None, verbose=False):
         models = OrderedDict()
         blob_channels = dict()
         blob_width = dict()
@@ -764,8 +764,8 @@ class CaffeNet(nn.Module):
                     bias = False
                 models[lname] = nn.Conv2d(channels, out_filters, kernel_size=kernel_size, stride=stride, padding=pad, dilation=dilation, groups=group, bias=bias)
                 blob_channels[tname] = out_filters
-                blob_width[tname] = (blob_width[bname] + 2*pad - kernel_size)/stride + 1
-                blob_height[tname] = (blob_height[bname] + 2*pad - kernel_size)/stride + 1
+                blob_width[tname] = int(math.floor((blob_width[bname] + 2*pad - kernel_size)/stride + 1))
+                blob_height[tname] = int(math.floor((blob_height[bname] + 2*pad - kernel_size)/stride + 1))
                 i = i + 1
             elif ltype == 'BatchNorm':
                 momentum = 0.9
@@ -1035,7 +1035,8 @@ class CaffeNet(nn.Module):
             output_width = blob_width[tname] if type(tname) != list else blob_width[tname[0]]
             output_height = blob_height[tname] if type(tname) != list else blob_height[tname[0]]
             output_channels = blob_channels[tname] if type(tname) != list else blob_channels[tname[0]]
-            print('create %-20s (%4d x %4d x %4d) -> (%4d x %4d x %4d)' % (lname, input_channels, input_height, input_width, output_channels, output_height, output_width))
+            if verbose:
+                print('create %-20s (%4d x %4d x %4d) -> (%4d x %4d x %4d)' % (lname, input_channels, input_height, input_width, output_channels, output_height, output_width))
 
         return models
 

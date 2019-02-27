@@ -8,7 +8,7 @@ Supported Caffe layers:
     'Permute', 'Flatten', 'Slice', 'Concat', 'Softmax', 'SoftmaxWithLoss',
     'LRN', 'Dropout', 'Reshape', 'PriorBox', 'DetectionOutput'
     
-***Notice: This code requires pycaffe API***
+***Notice: This code requires python2***
 """
 
 from caffe2pth.caffenet import *
@@ -17,13 +17,13 @@ import caffe.proto.caffe_pb2 as caffe_pb2
 
 
 # Default input prototxt path
-_PROTOTXT_PATH = 'VGG19.prototxt'
+_PROTOTXT_PATH = '/mnt/lustre/share/shenyujun/models/106points/106points.prototxt'
 
 # Default input caffemodel path
-_CAFFEMODEL_PATH = 'VGG19.caffemodel'
+_CAFFEMODEL_PATH = '/mnt/lustre/share/shenyujun/models/106points/106points.caffemodel'
 
 # Default output pytorch weights path
-_PTHMODEL_PATH = 'VGG19_CaffeNet.pth'
+_PTHMODEL_PATH = '/mnt/lustre/share/shenyujun/models/106points/106points.pth'
 
 
 def parse_caffemodel(caffemodel):
